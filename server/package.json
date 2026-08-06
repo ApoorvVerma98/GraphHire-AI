@@ -1,0 +1,30 @@
+{
+  "name": "graphhire-ai-server",
+  "version": "1.0.0",
+  "description": "Backend API for GraphHire AI using Express and CognoDB",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "seed": "node seed/seed.js"
+  },
+  "keywords": [
+    "express",
+    "graph",
+    "neo4j",
+    "cognodb",
+    "graphhire"
+  ],
+  "author": "Apoorv Verma",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "neo4j-driver": "^5.28.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
