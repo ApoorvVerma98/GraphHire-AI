@@ -1,11 +1,13 @@
-import { runQuery } from '../config/db.js';
-import { 
-  GET_ALL_CANDIDATES, 
-  GET_CANDIDATE_BY_ID, 
+import { runQuery } from "../config/db.js";
+import {
+  GET_ALL_CANDIDATES,
+  GET_CANDIDATE_BY_ID,
   SEARCH_CANDIDATES_BY_SKILL,
   GET_CANDIDATE_SKILL_COVERAGE,
-  EXPLORE_SKILL_GAPS
-} from '../queries/candidateQueries.js';
+  EXPLORE_SKILL_GAPS,
+  GET_SKILL_PATH_VALIDATION,
+  GET_SKILL_PATH_RELATED,
+} from "../queries/candidateQueries.js";
 
 export const fetchAllCandidates = async () => {
   return await runQuery(GET_ALL_CANDIDATES);
@@ -26,7 +28,7 @@ export async function calculateTeamBuilder(requiredSkills) {
       requiredSkills
         .filter((skill) => typeof skill === "string")
         .map((skill) => skill.trim())
-        .filter(Boolean)
+        .filter(Boolean),
     ),
   ];
 
@@ -42,14 +44,14 @@ export async function calculateTeamBuilder(requiredSkills) {
       .map((candidate) => ({
         ...candidate,
         contributionSkills: candidate.matchingSkills.filter((skill) =>
-          remainingSkills.has(skill)
+          remainingSkills.has(skill),
         ),
       }))
       .sort(
         (a, b) =>
           b.contributionSkills.length - a.contributionSkills.length ||
           b.skillMatchCount - a.skillMatchCount ||
-          a.name.localeCompare(b.name)
+          a.name.localeCompare(b.name),
       );
     const bestCandidate = rankedCandidates[0];
 
@@ -58,20 +60,37 @@ export async function calculateTeamBuilder(requiredSkills) {
     }
 
     team.push(bestCandidate);
-    bestCandidate.contributionSkills.forEach((skill) => remainingSkills.delete(skill));
+    bestCandidate.contributionSkills.forEach((skill) =>
+      remainingSkills.delete(skill),
+    );
     unselectedCandidates.splice(
-      unselectedCandidates.findIndex((candidate) => candidate.id === bestCandidate.id),
-      1
+      unselectedCandidates.findIndex(
+        (candidate) => candidate.id === bestCandidate.id,
+      ),
+      1,
     );
   }
 
   return {
     team,
-    coveredSkills: normalizedSkills.filter((skill) => !remainingSkills.has(skill)),
+    allMatches: candidates,
+    coveredSkills: normalizedSkills.filter(
+      (skill) => !remainingSkills.has(skill),
+    ),
     uncoveredSkills: [...remainingSkills],
   };
 }
 
 export async function findSkillGaps(candidateId) {
-  return await runQuery(EXPLORE_SKILL_GAPS, { candidateId });
+  const data = await runQuery(EXPLORE_SKILL_GAPS, { candidateId });
+  const related = await runQuery(GET_SKILL_PATH_RELATED, { candidateId });
+  const validation = await runQuery(GET_SKILL_PATH_VALIDATION, { candidateId });
+  const stats = validation[0] || { knownSkills: [] };
+  const relatedSkills = related[0]?.relatedSkills || [];
+  return {
+    data,
+    knownSkills: stats.knownSkills || [],
+    relatedSkills,
+    relatedSkillCount: relatedSkills.length,
+  };
 }

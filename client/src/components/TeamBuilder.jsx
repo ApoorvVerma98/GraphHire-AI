@@ -1,9 +1,24 @@
-import { useState } from 'react';
-import { buildTeam } from '../services/api';
-import CypherExplain from './CypherExplain';
-import GraphVisualizer from './GraphVisualizer';
+import { useState } from "react";
+import { buildTeam } from "../services/api";
+import CypherExplain from "./CypherExplain";
+import GraphVisualizer from "./GraphVisualizer";
 
-const DEFAULT_SKILLS = ['React', 'Node.js', 'Docker', 'Kubernetes', 'TypeScript', 'Python', 'GraphQL'];
+const DEFAULT_SKILLS = [
+  "React",
+  "Node.js",
+  "TypeScript",
+  "Python",
+  "GraphQL",
+  "AWS",
+  "Docker",
+  "Kubernetes",
+  "PostgreSQL",
+  "MongoDB",
+  "Redis",
+  "JWT",
+  "Neo4j",
+  "Tailwind CSS",
+];
 
 export default function TeamBuilder() {
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -13,7 +28,7 @@ export default function TeamBuilder() {
 
   const toggleSkill = (skill) => {
     setSelectedSkills((prev) =>
-      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
     );
   };
 
@@ -25,7 +40,7 @@ export default function TeamBuilder() {
       const res = await buildTeam(selectedSkills);
       setResults(res.data);
     } catch (err) {
-      setError('Failed to query database. Ensure CognoDB/Backend is online.');
+      setError("Failed to query database. Ensure CognoDB/Backend is online.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -33,91 +48,158 @@ export default function TeamBuilder() {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7 shadow-sm space-y-6">
+    <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 sm:p-7 space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-500">Coverage planner</p>
-          <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Build a balanced delivery team</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Select the capabilities your project needs. The graph recommends the smallest team that covers the most remaining skills at each step.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-teal-600)]">
+            Coverage planner
+          </p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+            Recommend a minimal delivery team
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-muted)]">
+            Select the capabilities your project needs. This feature returns the
+            smallest set of candidates whose combined skills cover all selected
+            requirements.
+          </p>
         </div>
-        <span className="w-fit rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700">Greedy set cover</span>
+        <span className="w-fit rounded-full bg-[var(--color-teal-50)] px-3 py-1.5 text-xs font-semibold text-[var(--color-teal-700)]">
+          Greedy set cover
+        </span>
       </div>
 
-      <div className="rounded-2xl bg-slate-50 p-4 sm:p-5">
-        <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Required skills</p>
+      <div className="rounded-xl bg-[var(--color-canvas)] p-4 sm:p-5">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
+          Required skills
+        </p>
         <div className="flex flex-wrap gap-2">
-        {DEFAULT_SKILLS.map((skill) => (
-          <button
-            key={skill}
-            onClick={() => toggleSkill(skill)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              selectedSkills.includes(skill)
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {selectedSkills.includes(skill) ? `✓ ${skill}` : `+ ${skill}`}
-          </button>
-        ))}
+          {DEFAULT_SKILLS.map((skill) => {
+            const active = selectedSkills.includes(skill);
+            return (
+              <button
+                key={skill}
+                onClick={() => toggleSkill(skill)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                  active
+                    ? "bg-[var(--color-teal-600)] text-white"
+                    : "bg-white text-[var(--color-ink-soft)] border border-[var(--color-line)] hover:border-[var(--color-line-strong)]"
+                }`}
+              >
+                {skill}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <button
         onClick={handleBuildTeam}
         disabled={loading || selectedSkills.length === 0}
-        className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-3 rounded-xl disabled:opacity-50 transition shadow-sm shadow-indigo-200"
+        className="w-full rounded-xl bg-[var(--color-teal-600)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-teal-700)] disabled:opacity-40 sm:w-auto"
       >
-        {loading ? 'Building coverage recommendation...' : 'Build Recommended Team'}
+        {loading
+          ? "Building coverage recommendation…"
+          : "Build recommended team"}
       </button>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
-          ⚠️ {error}
+        <div
+          className="rounded-xl border border-[var(--color-amber-100)] bg-[var(--color-amber-50)] p-4 text-sm text-[var(--color-amber-900)]"
+          role="alert"
+        >
+          {error}
         </div>
       )}
 
       {results && (
         <div className="mt-6 space-y-4">
-          <div className="flex items-end justify-between gap-4 border-t border-slate-100 pt-6">
-            <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Recommendation</p><h3 className="mt-1 text-xl font-bold text-slate-900">Recommended team</h3></div>
-            <span className="text-sm text-slate-500">{results.data.length} selected</span>
+          <div className="flex flex-col gap-4 border-t border-[var(--color-line)] pt-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
+                Recommendation
+              </p>
+              <h3 className="mt-1 text-xl font-semibold">Recommended team</h3>
+              {results.allMatches && (
+                <p className="mt-2 text-sm text-[var(--color-muted)]">
+                  {results.data.length} candidate(s) recommended from{" "}
+                  {results.allMatches.length} matching candidate(s).
+                </p>
+              )}
+            </div>
+            <span className="font-data text-sm text-[var(--color-muted)]">
+              {results.data.length} selected
+            </span>
           </div>
 
           {results.coverage?.uncoveredSkills?.length > 0 && (
-            <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl">
-              No available candidate covers: {results.coverage.uncoveredSkills.join(', ')}.
+            <div className="rounded-xl border border-[var(--color-amber-100)] bg-[var(--color-amber-50)] p-4 text-sm text-[var(--color-amber-900)]">
+              No available candidate covers:{" "}
+              {results.coverage.uncoveredSkills.join(", ")}.
             </div>
           )}
+          {results.allMatches &&
+            results.allMatches.length > results.data.length && (
+              <div className="rounded-xl border border-[var(--color-teal-100)] bg-[var(--color-teal-50)]/70 p-4 text-sm text-[var(--color-teal-900)]">
+                This recommendation is the smallest team that covers all
+                selected skills. {results.allMatches.length} candidate(s) match
+                the chosen skills in total, but only {results.data.length} are
+                needed to cover them.
+              </div>
+            )}
 
           {results.data.length === 0 ? (
-            <div className="p-6 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
-              <p className="text-sm text-gray-500">No candidates found matching the selected skills.</p>
+            <div className="rounded-xl border border-dashed border-[var(--color-line-strong)] bg-[var(--color-canvas)] p-6 text-center text-sm text-[var(--color-muted)]">
+              No candidates found matching the selected skills.
             </div>
           ) : (
             <div className="grid gap-3">
               {results.data.map((candidate) => (
-                <div key={candidate.id} className="p-4 sm:p-5 border border-slate-200 rounded-xl flex justify-between items-center hover:border-indigo-300 hover:shadow-sm transition">
+                <div
+                  key={candidate.id}
+                  className="flex items-center justify-between rounded-xl border border-[var(--color-line)] p-4 transition hover:border-[var(--color-teal-100)] sm:p-5"
+                >
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-gray-900">{candidate.name}</h4>
+                      <h4 className="font-semibold">{candidate.name}</h4>
                       {candidate.contributionSkills?.length > 0 && (
-                        <span className="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        <span className="rounded-full bg-[var(--color-teal-50)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-teal-700)]">
                           Covers {candidate.contributionSkills.length} new
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500">{candidate.role || 'Full Stack Engineer'}</p>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {candidate.matchingSkills.map((s) => (
-                        <span key={s} className={`border text-xs px-2 py-0.5 rounded-md font-medium ${candidate.contributionSkills?.includes(s) ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
-                          {s}
-                        </span>
-                      ))}
+                    <p className="text-xs text-[var(--color-muted)]">
+                      {candidate.role || "Full Stack Engineer"}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {candidate.matchingSkills.map((s) => {
+                        const isNew = candidate.contributionSkills?.includes(s);
+                        return (
+                          <span
+                            key={s}
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-ink-soft)]"
+                          >
+                            <span
+                              className="inline-block h-2 w-2 rounded-full"
+                              style={{
+                                background: isNew
+                                  ? "var(--color-teal-600)"
+                                  : "var(--color-line-strong)",
+                              }}
+                              aria-hidden="true"
+                            />
+                            {s}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-2xl font-black text-indigo-600">{candidate.contributionSkills?.length || 0}</span>
-                    <span className="text-xs text-gray-400 block font-medium">New skills</span>
+                    <span className="font-data text-2xl font-semibold text-[var(--color-teal-700)]">
+                      {candidate.contributionSkills?.length || 0}
+                    </span>
+                    <span className="block text-xs font-medium text-[var(--color-muted)]">
+                      New skills
+                    </span>
                   </div>
                 </div>
               ))}
@@ -125,7 +207,10 @@ export default function TeamBuilder() {
           )}
 
           <GraphVisualizer data={results} type="team" />
-          <CypherExplain explain={results.explain} metadata={results.metadata} />
+          <CypherExplain
+            explain={results.explain}
+            metadata={results.metadata}
+          />
         </div>
       )}
     </div>

@@ -2,6 +2,10 @@
 
 GraphHire AI is a recruitment-intelligence application for exploring candidate capabilities as a connected graph. It helps a hiring manager build a small team for a required set of skills and identify a candidate's next useful skills through graph traversal.
 
+All candidate, company, and project records are fictional but designed to represent realistic product-engineering hiring scenarios.
+
+Candidate skills are intentionally role-consistent and include per-candidate proficiency and years of experience on each `KNOWS` relationship. Running the seed script replaces GraphHire-labelled data so stale demo relationships do not remain in the graph.
+
 > **Before submitting:** replace the two placeholders below with your real public links.
 >
 > - Hosted demo: `ADD_DEPLOYED_FRONTEND_URL`
@@ -38,12 +42,15 @@ CognoDB's openCypher graph model expresses those paths directly. For example, th
 2. Cypher returns every candidate with one or more matching `KNOWS` relationships.
 3. The backend applies a deterministic greedy set-cover algorithm: at each step it selects the candidate covering the most still-uncovered skills.
 4. The UI shows the recommended team, each member's new contribution, unmatched requested skills, and an interactive candidate-skill graph.
+5. This is intentionally a minimal coverage recommendation, not a full list of every candidate who knows any selected skill.
 
 ### Skill Gap Explorer
 
 1. A user enters a candidate ID.
 2. Cypher follows `Candidate → Skill → RELATED_TO → Skill`.
 3. The query excludes skills already connected to that candidate and returns a suggested next skill plus known prerequisite skills.
+
+If the returned result is empty, that means the current related-skill graph has no adjacent next-step skill that the candidate does not already know. This is still a valid graph outcome: the model has no further recommendation for that candidate in the current skill relationship set.
 
 This is a genuine multi-hop graph traversal and is awkward to maintain as a variable-depth relational join.
 

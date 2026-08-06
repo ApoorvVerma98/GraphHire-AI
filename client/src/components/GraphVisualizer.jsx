@@ -14,24 +14,24 @@ export default function GraphVisualizer({ data, type = 'team' }) {
       data.data.slice(0, 5).forEach((cand) => {
         const candNodeId = `c_${cand.id}`;
         if (!nodesMap.has(candNodeId)) {
-          nodesMap.set(candNodeId, { 
-            id: candNodeId, 
-            name: cand.name, 
-            group: 'Candidate', 
-            color: '#6366f1', // Indigo
-            val: 8 
+          nodesMap.set(candNodeId, {
+            id: candNodeId,
+            name: cand.name,
+            group: 'Candidate',
+            color: '#c9dfd8', // teal-100
+            val: 8
           });
         }
 
         cand.matchingSkills.forEach((skillName) => {
           const skillNodeId = `s_${skillName}`;
           if (!nodesMap.has(skillNodeId)) {
-            nodesMap.set(skillNodeId, { 
-              id: skillNodeId, 
-              name: skillName, 
-              group: 'Skill', 
-              color: '#10b981', // Emerald
-              val: 6 
+            nodesMap.set(skillNodeId, {
+              id: skillNodeId,
+              name: skillName,
+              group: 'Skill',
+              color: '#edd3b3', // amber-100
+              val: 6
             });
           }
           links.push({ source: candNodeId, target: skillNodeId, label: 'KNOWS' });
@@ -57,22 +57,20 @@ export default function GraphVisualizer({ data, type = 'team' }) {
   if (!graphData.nodes.length) return null;
 
   return (
-    <div className="mt-6 border border-slate-800 bg-slate-950 rounded-2xl p-4 sm:p-5 overflow-hidden shadow-xl shadow-slate-300/40">
-      <div className="flex justify-between items-center mb-3 px-1">
-        <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-          Interactive knowledge graph
-        </h3>
+    <div className="mt-6 overflow-hidden rounded-2xl border border-[var(--color-ink)] bg-[var(--color-ink)] p-4 sm:p-5">
+      <div className="mb-3 flex items-center justify-between px-1">
+        <h3 className="text-sm font-semibold text-white">Interactive knowledge graph</h3>
         <div className="flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1 text-indigo-400 font-medium">
-            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span> Candidate
+          <span className="flex items-center gap-1.5 font-medium text-white/70">
+            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: '#c9dfd8' }}></span> Candidate
           </span>
-          <span className="flex items-center gap-1 text-emerald-400 font-medium">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Skill
+          <span className="flex items-center gap-1.5 font-medium text-white/70">
+            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: '#edd3b3' }}></span> Skill
           </span>
         </div>
       </div>
 
-      <div ref={graphContainerRef} className="h-80 w-full rounded-xl overflow-hidden bg-slate-900 flex justify-center items-center border border-slate-800/80">
+      <div ref={graphContainerRef} className="flex h-80 w-full items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black/20">
         {graphWidth > 0 && (
           <ForceGraph2D
             graphData={graphData}

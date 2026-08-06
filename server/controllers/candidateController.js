@@ -116,6 +116,7 @@ export const handleTeamBuilder = async (req, res) => {
       success: true,
       message: "Minimum-coverage team recommendation generated",
       data: recommendation.team,
+      allMatches: recommendation.allMatches,
       coverage: {
         coveredSkills: recommendation.coveredSkills,
         uncoveredSkills: recommendation.uncoveredSkills,
@@ -143,7 +144,12 @@ export const handleSkillGap = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Skill gaps and upgrade paths calculated successfully",
-      data: gaps,
+      data: gaps.data,
+      relatedSkills: gaps.relatedSkills,
+      stats: {
+        knownSkills: gaps.knownSkills,
+        relatedSkillCount: gaps.relatedSkillCount,
+      },
       metadata: { executionTimeMs: Date.now() - startTime },
       explain: {
         summary:
