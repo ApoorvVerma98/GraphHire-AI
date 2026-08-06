@@ -6,9 +6,9 @@ All candidate, company, and project records are fictional but designed to repres
 
 Candidate skills are intentionally role-consistent and include per-candidate proficiency and years of experience on each `KNOWS` relationship. Running the seed script replaces GraphHire-labelled data so stale demo relationships do not remain in the graph.
 
-> **Before submitting:** replace the two placeholders below with your real public links.
+> **Before submitting:** replace the screen recording placeholder below with your real public link.
 >
-> - Hosted demo: `ADD_DEPLOYED_FRONTEND_URL`
+> - Hosted demo: https://graph-hire-ai.vercel.app/
 > - Screen recording: `ADD_SCREEN_RECORDING_URL`
 
 ## Why a graph database?
@@ -174,18 +174,19 @@ Deploy `server` and `client` independently.
 
 ## Screenshots
 
-Add current screenshots before submission:
+Add current screenshots before submission. If you prefer, use a single screenshot file named `Screenshot.png` in the repo root or a `screenshots/` folder.
 
-1. Dashboard and Team Builder result with the interactive graph.
-2. Skill Gap Explorer result.
-3. Database-unavailable error state.
+1. `Screenshot.png` — the deployed app dashboard and workflow overview.
+2. `screenshots/dashboard.png` — dashboard and Team Builder overview.
+3. `screenshots/skill-paths.png` — Skill Gap Explorer result and related skill output.
+4. `screenshots/error-state.png` — database-unavailable or error state.
 
-## Submission checklist
+For example:
 
-- [ ] Hosted demo URL added at the top of this README
-- [ ] Screen-recording URL added at the top of this README
-- [ ] Current screenshots added above
-- [ ] CognoDB password rotated if the previous `.env` was shared
-- [ ] `client` lint and production build pass
-- [ ] Seed script runs against the live CognoDB instance
-- [ ] Deployed frontend can call the deployed backend
+```md
+![App dashboard](Screenshot.png)
+![Dashboard and Team Builder](screenshots/dashboard.png)
+![Skill Path Explorer](screenshots/skill-paths.png)
+![Database error state](screenshots/error-state.png)
+```
+
