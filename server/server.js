@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { connectDB } from "./config/db.js";
+import { connectDB, getConnectionStatus } from "./config/db.js";
+import { requireDbConnection } from "./middleware/requireDbConnection.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
 import graphRoutes from "./routes/graphRoutes.js";
 
@@ -36,8 +37,8 @@ app.use(
 app.use(express.json());
 
 // Routes
-app.use("/api/candidates", candidateRoutes);
-app.use("/api/graph", graphRoutes);
+app.use("/api/candidates", requireDbConnection, candidateRoutes);
+app.use("/api/graph", requireDbConnection, graphRoutes);
 
 app.get("/", (req, res) => {
   res.json({
@@ -51,4 +52,12 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   await connectDB();
+});
+
+app.get("/health", (req, res) => {
+  const { available } = getConnectionStatus();
+  res.status(available ? 200 : 503).json({
+    success: available,
+    database: available ? "available" : "unavailable",
+  });
 });

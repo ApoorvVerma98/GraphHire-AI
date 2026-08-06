@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 
 export default function GraphVisualizer({ data, type = 'team' }) {
+  const graphContainerRef = useRef(null);
+  const [graphWidth, setGraphWidth] = useState(0);
   const graphData = useMemo(() => {
     if (!data || !data.data || data.data.length === 0) return { nodes: [], links: [] };
 
@@ -40,13 +42,25 @@ export default function GraphVisualizer({ data, type = 'team' }) {
     return { nodes: Array.from(nodesMap.values()), links };
   }, [data, type]);
 
+  useEffect(() => {
+    const container = graphContainerRef.current;
+    if (!container) return undefined;
+
+    const observer = new ResizeObserver(([entry]) => {
+      setGraphWidth(Math.floor(entry.contentRect.width));
+    });
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, []);
+
   if (!graphData.nodes.length) return null;
 
   return (
-    <div className="mt-6 border border-slate-800 bg-slate-900 rounded-2xl p-4 overflow-hidden shadow-xl">
+    <div className="mt-6 border border-slate-800 bg-slate-950 rounded-2xl p-4 sm:p-5 overflow-hidden shadow-xl shadow-slate-300/40">
       <div className="flex justify-between items-center mb-3 px-1">
         <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-          🕸️ Interactive Knowledge Graph
+          Interactive knowledge graph
         </h3>
         <div className="flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1 text-indigo-400 font-medium">
@@ -58,36 +72,34 @@ export default function GraphVisualizer({ data, type = 'team' }) {
         </div>
       </div>
 
-      <div className="h-72 w-full rounded-xl overflow-hidden bg-slate-950 flex justify-center items-center border border-slate-800/80">
-        <ForceGraph2D
-          graphData={graphData}
-          nodeVal={(node) => node.val}
-          nodeColor={(node) => node.color}
-          linkColor={() => '#475569'}
-          linkWidth={1.5}
-          linkDirectionalParticles={2}
-          linkDirectionalParticleSpeed={0.005}
-          linkDirectionalParticleWidth={2}
-          nodeCanvasObject={(node, ctx, globalScale) => {
-            const label = node.name;
-            const fontSize = 12 / globalScale;
-            ctx.font = `${fontSize}px Sans-Serif`;
-
-            // Draw Node Circle
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, node.val, 0, 2 * Math.PI, false);
-            ctx.fillStyle = node.color;
-            ctx.fill();
-
-            // Draw Text Label Below Node
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.fillStyle = '#f8fafc';
-            ctx.fillText(label, node.x, node.y + node.val + 2);
-          }}
-          width={650}
-          height={280}
-        />
+      <div ref={graphContainerRef} className="h-80 w-full rounded-xl overflow-hidden bg-slate-900 flex justify-center items-center border border-slate-800/80">
+        {graphWidth > 0 && (
+          <ForceGraph2D
+            graphData={graphData}
+            nodeVal={(node) => node.val}
+            nodeColor={(node) => node.color}
+            linkColor={() => '#475569'}
+            linkWidth={1.5}
+            linkDirectionalParticles={2}
+            linkDirectionalParticleSpeed={0.005}
+            linkDirectionalParticleWidth={2}
+            nodeCanvasObject={(node, ctx, globalScale) => {
+              const label = node.name;
+              const fontSize = 12 / globalScale;
+              ctx.font = `${fontSize}px Sans-Serif`;
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, node.val, 0, 2 * Math.PI, false);
+              ctx.fillStyle = node.color;
+              ctx.fill();
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'top';
+              ctx.fillStyle = '#f8fafc';
+              ctx.fillText(label, node.x, node.y + node.val + 2);
+            }}
+            width={graphWidth}
+            height={320}
+          />
+        )}
       </div>
     </div>
   );

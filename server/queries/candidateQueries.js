@@ -21,8 +21,9 @@ export const SEARCH_CANDIDATES_BY_SKILL = `
   RETURN c.id AS id, c.name AS name, c.role AS role, collect(DISTINCT s.name) AS skills
 `;
 
-// Phase 2: Team Builder (Set-Cover Strategy using Cypher traversal)
-export const BUILD_TEAM_BY_SKILLS = `
+// Returns each eligible candidate's coverage. The service applies the greedy
+// set-cover selection so the algorithm is explicit and testable in JavaScript.
+export const GET_CANDIDATE_SKILL_COVERAGE = `
   WITH $requiredSkills AS reqSkills
   MATCH (c:Candidate)-[:KNOWS]->(s:Skill)
   WHERE s.name IN reqSkills

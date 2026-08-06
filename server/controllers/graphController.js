@@ -3,6 +3,17 @@ import {
   getTopSkills,
   getTopCompanies,
 } from "../services/graphService.js";
+import { getConnectionStatus } from "../config/db.js";
+
+const sendGraphError = (res) => {
+  const databaseAvailable = getConnectionStatus().available;
+  return res.status(databaseAvailable ? 500 : 503).json({
+    success: false,
+    message: databaseAvailable
+      ? "Unable to retrieve graph data. Please try again."
+      : "The graph database is temporarily unavailable. Please try again shortly.",
+  });
+};
 
 export const graphStats = async (req, res) => {
   try {
@@ -15,10 +26,7 @@ export const graphStats = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch graph stats",
-    });
+    sendGraphError(res);
   }
 };
 
@@ -33,10 +41,7 @@ export const topSkills = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch top skills",
-    });
+    sendGraphError(res);
   }
 };
 
@@ -51,9 +56,6 @@ export const topCompanies = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch top companies",
-    });
+    sendGraphError(res);
   }
 };

@@ -292,3 +292,28 @@ export const skillMetadata = {
   MySQL: { level: "Advanced", years: 4 },
   Firebase: { level: "Intermediate", years: 2 },
 };
+
+// Curated, directed learning or complementary-technology paths used by the
+// Skill Gap Explorer. These are intentionally domain relationships, not list order.
+export const skillRelationships = [
+  ["HTML", "CSS"],
+  ["JavaScript", "TypeScript"],
+  ["JavaScript", "React"],
+  ["React", "Redux"],
+  ["React", "Next.js"],
+  ["React", "Tailwind CSS"],
+  ["React", "Material UI"],
+  ["Node.js", "Express"],
+  ["Node.js", "REST API"],
+  ["Node.js", "GraphQL"],
+  ["Express", "JWT"],
+  ["MongoDB", "Redis"],
+  ["Docker", "Kubernetes"],
+  ["Linux", "Docker"],
+  ["AWS", "CI/CD"],
+  ["Git", "CI/CD"],
+  ["Python", "PostgreSQL"],
+  ["Java", "Spring Boot"],
+  ["Java", "MySQL"],
+  ["Neo4j", "GraphQL"],
+];
