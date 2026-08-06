@@ -1,10 +1,10 @@
 # GraphHire AI
 
-GraphHire AI is a recruitment-intelligence application for exploring candidate capabilities as a connected graph. It helps a hiring manager build a small team for a required set of skills and identify a candidate's next useful skills through graph traversal.
+GraphHire AI is a recruitment-intelligence application built on a graph database. It enables hiring managers to explore candidates, assemble coverage-based teams, and identify logical next skills for growth.
 
-All candidate, company, and project records are fictional but designed to represent realistic product-engineering hiring scenarios.
+The data is fictional but realistic, designed to support product-engineering hiring scenarios.
 
-Candidate skills are intentionally role-consistent and include per-candidate proficiency and years of experience on each `KNOWS` relationship. Running the seed script replaces GraphHire-labelled data so stale demo relationships do not remain in the graph.
+Candidate skills are modeled with role-relevant proficiency and years of experience on each `KNOWS` relationship. The seed script is idempotent and replaces existing GraphHire data to keep the demo dataset consistent.
 
 > **Before submitting:** replace the screen recording placeholder below with your real public link.
 >
@@ -15,7 +15,7 @@ Candidate skills are intentionally role-consistent and include per-candidate pro
 
 Recruitment questions are fundamentally relationship questions: which candidates know which skills, which projects required those skills, and what related capability should a person learn next? In a relational database, queries that follow changing numbers of candidate-to-skill-to-skill or candidate-to-project-to-technology links require increasingly complex joins and anti-joins.
 
-CognoDB's openCypher graph model expresses those paths directly. For example, the Skill Gap Explorer follows a two-hop path from a candidate's known skill to a related skill, then excludes skills the candidate already knows. The Team Builder starts from `Candidate-[:KNOWS]->Skill` relationships and selects a small group whose combined coverage satisfies a requested skill set.
+CognoDB's openCypher graph model expresses those paths directly. The Skill Gap Explorer follows a two-hop traversal from a candidate's known skill to a related skill, then excludes skills already known by the candidate. The Team Builder starts from `Candidate-[:KNOWS]->Skill` relationships and selects a compact team whose combined coverage satisfies the requested skill set.
 
 ## Graph data model
 
@@ -50,9 +50,9 @@ CognoDB's openCypher graph model expresses those paths directly. For example, th
 2. Cypher follows `Candidate → Skill → RELATED_TO → Skill`.
 3. The query excludes skills already connected to that candidate and returns a suggested next skill plus known prerequisite skills.
 
-If the returned result is empty, that means the current related-skill graph has no adjacent next-step skill that the candidate does not already know. This is still a valid graph outcome: the model has no further recommendation for that candidate in the current skill relationship set.
+If the returned result is empty, the current related-skill graph has no adjacent next-step skill that the candidate does not already know. This is a valid graph outcome: the model simply has no further recommendation for that candidate in the current skill relationship set.
 
-This is a genuine multi-hop graph traversal and is awkward to maintain as a variable-depth relational join.
+This is a multi-hop graph traversal and is more natural in a graph model than as a variable-depth relational join.
 
 ## Key Cypher queries
 
@@ -171,14 +171,5 @@ Deploy `server` and `client` independently.
 - Backend: set `URI`, `DB_USERNAME`, `DB_PASSWORD`, and `CLIENT_URL` in the hosting provider environment settings.
 - Frontend: set `VITE_API_BASE_URL` to the public backend URL, without `/api` at the end.
 - Confirm `CLIENT_URL` exactly matches the deployed frontend origin so the Express CORS policy permits it.
-
-## Screenshots
-
-Add current screenshots before submission. If you prefer, use a single screenshot file named `Screenshot.png` in the repo root or a `screenshots/` folder.
-
-1. `Screenshot.png` — the deployed app dashboard and workflow overview.
-2. `screenshots/dashboard.png` — dashboard and Team Builder overview.
-3. `screenshots/skill-paths.png` — Skill Gap Explorer result and related skill output.
-4. `screenshots/error-state.png` — database-unavailable or error state.
 
 
