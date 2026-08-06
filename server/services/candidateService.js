@@ -3,7 +3,7 @@ import {
   GET_ALL_CANDIDATES, 
   GET_CANDIDATE_BY_ID, 
   SEARCH_CANDIDATES_BY_SKILL,
-  BUILD_TEAM_BY_SKILLS, 
+  GET_CANDIDATE_SKILL_COVERAGE,
   EXPLORE_SKILL_GAPS
 } from '../queries/candidateQueries.js';
 
@@ -21,7 +21,55 @@ export const searchCandidates = async (query) => {
 };
 
 export async function calculateTeamBuilder(requiredSkills) {
-  return await runQuery(BUILD_TEAM_BY_SKILLS, { requiredSkills });
+  const normalizedSkills = [
+    ...new Set(
+      requiredSkills
+        .filter((skill) => typeof skill === "string")
+        .map((skill) => skill.trim())
+        .filter(Boolean)
+    ),
+  ];
+
+  const candidates = await runQuery(GET_CANDIDATE_SKILL_COVERAGE, {
+    requiredSkills: normalizedSkills,
+  });
+  const remainingSkills = new Set(normalizedSkills);
+  const team = [];
+  const unselectedCandidates = [...candidates];
+
+  while (remainingSkills.size > 0 && unselectedCandidates.length > 0) {
+    const rankedCandidates = unselectedCandidates
+      .map((candidate) => ({
+        ...candidate,
+        contributionSkills: candidate.matchingSkills.filter((skill) =>
+          remainingSkills.has(skill)
+        ),
+      }))
+      .sort(
+        (a, b) =>
+          b.contributionSkills.length - a.contributionSkills.length ||
+          b.skillMatchCount - a.skillMatchCount ||
+          a.name.localeCompare(b.name)
+      );
+    const bestCandidate = rankedCandidates[0];
+
+    if (!bestCandidate || bestCandidate.contributionSkills.length === 0) {
+      break;
+    }
+
+    team.push(bestCandidate);
+    bestCandidate.contributionSkills.forEach((skill) => remainingSkills.delete(skill));
+    unselectedCandidates.splice(
+      unselectedCandidates.findIndex((candidate) => candidate.id === bestCandidate.id),
+      1
+    );
+  }
+
+  return {
+    team,
+    coveredSkills: normalizedSkills.filter((skill) => !remainingSkills.has(skill)),
+    uncoveredSkills: [...remainingSkills],
+  };
 }
 
 export async function findSkillGaps(candidateId) {

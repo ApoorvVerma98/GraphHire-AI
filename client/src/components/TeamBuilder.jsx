@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { buildTeam } from '../services/api';
 import CypherExplain from './CypherExplain';
 import GraphVisualizer from './GraphVisualizer';
@@ -33,13 +33,19 @@ export default function TeamBuilder() {
   };
 
   return (
-    <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-gray-900">🎯 Team Builder (Set-Cover Analysis)</h2>
-        <p className="text-sm text-gray-500 mt-1">Select project skills to find optimal candidates with maximum skill coverage.</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7 shadow-sm space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-500">Coverage planner</p>
+          <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Build a balanced delivery team</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Select the capabilities your project needs. The graph recommends the smallest team that covers the most remaining skills at each step.</p>
+        </div>
+        <span className="w-fit rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700">Greedy set cover</span>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="rounded-2xl bg-slate-50 p-4 sm:p-5">
+        <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Required skills</p>
+        <div className="flex flex-wrap gap-2">
         {DEFAULT_SKILLS.map((skill) => (
           <button
             key={skill}
@@ -53,14 +59,15 @@ export default function TeamBuilder() {
             {selectedSkills.includes(skill) ? `✓ ${skill}` : `+ ${skill}`}
           </button>
         ))}
+        </div>
       </div>
 
       <button
         onClick={handleBuildTeam}
         disabled={loading || selectedSkills.length === 0}
-        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl disabled:opacity-50 transition shadow-sm"
+        className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-3 rounded-xl disabled:opacity-50 transition shadow-sm shadow-indigo-200"
       >
-        {loading ? 'Evaluating Set-Cover Graph Query...' : 'Calculate Optimal Candidates'}
+        {loading ? 'Building coverage recommendation...' : 'Build Recommended Team'}
       </button>
 
       {error && (
@@ -71,7 +78,16 @@ export default function TeamBuilder() {
 
       {results && (
         <div className="mt-6 space-y-4">
-          <h3 className="text-md font-bold text-gray-800">Matched Candidates</h3>
+          <div className="flex items-end justify-between gap-4 border-t border-slate-100 pt-6">
+            <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Recommendation</p><h3 className="mt-1 text-xl font-bold text-slate-900">Recommended team</h3></div>
+            <span className="text-sm text-slate-500">{results.data.length} selected</span>
+          </div>
+
+          {results.coverage?.uncoveredSkills?.length > 0 && (
+            <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl">
+              No available candidate covers: {results.coverage.uncoveredSkills.join(', ')}.
+            </div>
+          )}
 
           {results.data.length === 0 ? (
             <div className="p-6 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
@@ -80,28 +96,28 @@ export default function TeamBuilder() {
           ) : (
             <div className="grid gap-3">
               {results.data.map((candidate) => (
-                <div key={candidate.id} className="p-4 border rounded-xl flex justify-between items-center hover:border-indigo-300 transition">
+                <div key={candidate.id} className="p-4 sm:p-5 border border-slate-200 rounded-xl flex justify-between items-center hover:border-indigo-300 hover:shadow-sm transition">
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-gray-900">{candidate.name}</h4>
-                      {candidate.skillMatchCount === selectedSkills.length && (
+                      {candidate.contributionSkills?.length > 0 && (
                         <span className="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-                          100% Match
+                          Covers {candidate.contributionSkills.length} new
                         </span>
                       )}
                     </div>
                     <p className="text-xs text-gray-500">{candidate.role || 'Full Stack Engineer'}</p>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {candidate.matchingSkills.map((s) => (
-                        <span key={s} className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-0.5 rounded-md font-medium">
+                        <span key={s} className={`border text-xs px-2 py-0.5 rounded-md font-medium ${candidate.contributionSkills?.includes(s) ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
                           {s}
                         </span>
                       ))}
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-2xl font-black text-indigo-600">{candidate.skillMatchCount}</span>
-                    <span className="text-xs text-gray-400 block font-medium">Matches</span>
+                    <span className="text-2xl font-black text-indigo-600">{candidate.contributionSkills?.length || 0}</span>
+                    <span className="text-xs text-gray-400 block font-medium">New skills</span>
                   </div>
                 </div>
               ))}

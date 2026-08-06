@@ -14,6 +14,7 @@ import {
   candidateCertification,
   projectSkills,
   skillMetadata,
+  skillRelationships,
 } from "./seedData.js";
 
 const session = driver.session();
@@ -389,7 +390,10 @@ console.log("✅ Candidate → Certification relationships created");
 // Skill -> RELATED_TO -> Skill
 // ==========================================================
 
-for (let i = 0; i < skills.length - 1; i++) {
+// The seed is idempotent and replaces the previous curated relationship set.
+await session.run(`MATCH (:Skill)-[r:RELATED_TO]->(:Skill) DELETE r`);
+
+for (const [skill1, skill2] of skillRelationships) {
   await session.run(
     `
     MATCH (s1:Skill {name:$skill1})
@@ -398,8 +402,8 @@ for (let i = 0; i < skills.length - 1; i++) {
     MERGE (s1)-[:RELATED_TO]->(s2)
     `,
     {
-      skill1: skills[i],
-      skill2: skills[i + 1],
+      skill1,
+      skill2,
     }
   );
 }

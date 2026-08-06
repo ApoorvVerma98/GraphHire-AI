@@ -1,10 +1,7 @@
-import driver from "../config/db.js";
+import { runQuery } from "../config/db.js";
 
 export const getGraphStats = async () => {
-  const session = driver.session();
-
-  try {
-    const result = await session.run(`
+  const records = await runQuery(`
       MATCH (n)
       OPTIONAL MATCH ()-[r]->()
 
@@ -12,23 +9,16 @@ export const getGraphStats = async () => {
         count(DISTINCT n) AS totalNodes,
         count(DISTINCT r) AS totalRelationships
     `);
+  const record = records[0];
 
-    const record = result.records[0];
-
-    return {
-      totalNodes: record.get("totalNodes").toNumber(),
-      totalRelationships: record.get("totalRelationships").toNumber(),
-    };
-  } finally {
-    await session.close();
-  }
+  return {
+    totalNodes: record.totalNodes,
+    totalRelationships: record.totalRelationships,
+  };
 };
 
 export const getTopSkills = async () => {
-  const session = driver.session();
-
-  try {
-    const result = await session.run(`
+  return runQuery(`
       MATCH (:Candidate)-[:KNOWS]->(s:Skill)
 
       RETURN
@@ -37,21 +27,10 @@ export const getTopSkills = async () => {
 
       ORDER BY count DESC
     `);
-
-    return result.records.map((record) => ({
-      skill: record.get("skill"),
-      count: record.get("count").toNumber(),
-    }));
-  } finally {
-    await session.close();
-  }
 };
 
 export const getTopCompanies = async () => {
-  const session = driver.session();
-
-  try {
-    const result = await session.run(`
+  return runQuery(`
       MATCH (:Candidate)-[:WORKED_AT]->(c:Company)
 
       RETURN
@@ -60,12 +39,4 @@ export const getTopCompanies = async () => {
 
       ORDER BY count DESC
     `);
-
-    return result.records.map((record) => ({
-      company: record.get("company"),
-      count: record.get("count").toNumber(),
-    }));
-  } finally {
-    await session.close();
-  }
 };

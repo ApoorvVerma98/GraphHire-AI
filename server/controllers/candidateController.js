@@ -9,9 +9,20 @@ import {
   GET_ALL_CANDIDATES,
   GET_CANDIDATE_BY_ID,
   SEARCH_CANDIDATES_BY_SKILL,
-  BUILD_TEAM_BY_SKILLS,
+  GET_CANDIDATE_SKILL_COVERAGE,
   EXPLORE_SKILL_GAPS,
 } from "../queries/candidateQueries.js";
+import { getConnectionStatus } from "../config/db.js";
+
+const sendQueryError = (res) => {
+  const databaseAvailable = getConnectionStatus().available;
+  return res.status(databaseAvailable ? 500 : 503).json({
+    success: false,
+    message: databaseAvailable
+      ? "Unable to complete the graph query. Please try again."
+      : "The graph database is temporarily unavailable. Please try again shortly.",
+  });
+};
 
 export const getCandidates = async (req, res) => {
   const startTime = Date.now();
@@ -29,7 +40,8 @@ export const getCandidates = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error(error);
+    sendQueryError(res);
   }
 };
 
@@ -60,7 +72,8 @@ export const getCandidateById = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error(error);
+    sendQueryError(res);
   }
 };
 
@@ -81,7 +94,8 @@ export const handleSearch = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error(error);
+    sendQueryError(res);
   }
 };
 
@@ -97,20 +111,25 @@ export const handleTeamBuilder = async (req, res) => {
   }
 
   try {
-    const teamCandidates = await calculateTeamBuilder(skills);
+    const recommendation = await calculateTeamBuilder(skills);
     res.status(200).json({
       success: true,
-      message: "Optimal candidate list for team selection generated",
-      data: teamCandidates,
+      message: "Minimum-coverage team recommendation generated",
+      data: recommendation.team,
+      coverage: {
+        coveredSkills: recommendation.coveredSkills,
+        uncoveredSkills: recommendation.uncoveredSkills,
+      },
       metadata: { executionTimeMs: Date.now() - startTime },
       explain: {
         summary:
-          "Filters candidates offering coverage across requested skill nodes.",
-        cypher: BUILD_TEAM_BY_SKILLS,
+          "Fetches eligible candidate-to-skill coverage, then applies a greedy set-cover selection to choose candidates that cover the most remaining requested skills.",
+        cypher: GET_CANDIDATE_SKILL_COVERAGE,
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error(error);
+    sendQueryError(res);
   }
 };
 
@@ -133,6 +152,7 @@ export const handleSkillGap = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error(error);
+    sendQueryError(res);
   }
 };
