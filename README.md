@@ -181,12 +181,4 @@ Add current screenshots before submission. If you prefer, use a single screensho
 3. `screenshots/skill-paths.png` — Skill Gap Explorer result and related skill output.
 4. `screenshots/error-state.png` — database-unavailable or error state.
 
-For example:
-
-```md
-![App dashboard](Screenshot.png)
-![Dashboard and Team Builder](screenshots/dashboard.png)
-![Skill Path Explorer](screenshots/skill-paths.png)
-![Database error state](screenshots/error-state.png)
-```
 
