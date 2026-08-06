@@ -3,11 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-console.log({
-  URI: process.env.URI,
-  USERNAME: process.env.DB_USERNAME,
-  PASSWORD: process.env.DB_PASSWORD,
-});
+
 
 const driver = neo4j.driver(
   process.env.URI,
