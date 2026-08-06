@@ -1,7 +1,8 @@
 // Fetch all candidates with their skills
 export const GET_ALL_CANDIDATES = `
   MATCH (c:Candidate)-[:KNOWS]->(s:Skill)
-  RETURN c.id AS id, c.name AS name, c.role AS role, collect(s.name) AS skills
+  RETURN c.id AS id, c.name AS name, c.role AS role, c.location AS location,
+         c.experience AS experience, c.availability AS availability, collect(s.name) AS skills
 `;
 
 // Fetch single candidate with skills and project experience (multi-hop traversal)
@@ -9,7 +10,8 @@ export const GET_CANDIDATE_BY_ID = `
   MATCH (c:Candidate {id: $id})
   OPTIONAL MATCH (c)-[:KNOWS]->(s:Skill)
   OPTIONAL MATCH (c)-[:WORKED_ON]->(p:Project)
-  RETURN c.id AS id, c.name AS name, c.role AS role, 
+  RETURN c.id AS id, c.name AS name, c.role AS role, c.location AS location,
+         c.experience AS experience, c.availability AS availability, c.summary AS summary,
          collect(DISTINCT s.name) AS skills, 
          collect(DISTINCT p.name) AS projects
 `;
@@ -18,7 +20,8 @@ export const GET_CANDIDATE_BY_ID = `
 export const SEARCH_CANDIDATES_BY_SKILL = `
   MATCH (c:Candidate)-[:KNOWS]->(s:Skill)
   WHERE toLower(s.name) CONTAINS toLower($query) OR toLower(c.name) CONTAINS toLower($query)
-  RETURN c.id AS id, c.name AS name, c.role AS role, collect(DISTINCT s.name) AS skills
+  RETURN c.id AS id, c.name AS name, c.role AS role, c.location AS location,
+         c.experience AS experience, c.availability AS availability, collect(DISTINCT s.name) AS skills
 `;
 
 // Returns each eligible candidate's coverage. The service applies the greedy
@@ -41,4 +44,16 @@ export const EXPLORE_SKILL_GAPS = `
   MATCH (c:Candidate {id: $candidateId})-[:KNOWS]->(s:Skill)-[:RELATED_TO]->(related:Skill)
   WHERE NOT (c)-[:KNOWS]->(related)
   RETURN DISTINCT related.name AS missingSkill, collect(s.name) AS prerequisites
+`;
+
+export const GET_SKILL_PATH_RELATED = `
+  MATCH (c:Candidate {id: $candidateId})-[:KNOWS]->(s:Skill)-[:RELATED_TO]->(related:Skill)
+  WITH related, collect(DISTINCT s.name) AS prerequisites
+  RETURN collect({ related: related.name, prerequisites: prerequisites }) AS relatedSkills
+`;
+
+export const GET_SKILL_PATH_VALIDATION = `
+  MATCH (c:Candidate {id: $candidateId})
+  OPTIONAL MATCH (c)-[:KNOWS]->(s:Skill)
+  RETURN collect(DISTINCT s.name) AS knownSkills
 `;

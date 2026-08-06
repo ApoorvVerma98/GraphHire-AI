@@ -13,7 +13,6 @@ import {
   candidateProjects,
   candidateCertification,
   projectSkills,
-  skillMetadata,
   skillRelationships,
 } from "./seedData.js";
 
@@ -22,6 +21,15 @@ const session = driver.session();
 async function seedDatabase() {
   try {
     console.log("🚀 Starting GraphHire AI database seeding...");
+
+    // This command owns the GraphHire labels. Clearing them first prevents stale
+    // relationships from an older dataset from appearing in the application.
+    await session.run(`
+      MATCH (n)
+      WHERE n:Candidate OR n:Skill OR n:Company OR n:Project
+         OR n:Technology OR n:Certification OR n:Role
+      DETACH DELETE n
+    `);
 
     // ==========================================================
     // Constraints
@@ -205,7 +213,9 @@ async function seedDatabase() {
           c.role = $role,
           c.email = $email,
           c.location = $location,
-          c.experience = $experience
+          c.experience = $experience,
+          c.availability = $availability,
+          c.summary = $summary
         `,
         candidate
       );
@@ -241,8 +251,7 @@ async function seedDatabase() {
     for (const candidate of candidates) {
   const candidateSkillList = candidateSkills[candidate.id];
 
-  for (const skill of candidateSkillList) {
-    const meta = skillMetadata[skill];
+  for (const skillProfile of candidateSkillList) {
 
     await session.run(
       `
@@ -257,9 +266,9 @@ async function seedDatabase() {
       `,
       {
         candidateId: candidate.id,
-        skill,
-        level: meta.level,
-        years: meta.years,
+        skill: skillProfile.name,
+        level: skillProfile.level,
+        years: skillProfile.years,
       }
     );
   }
