@@ -9,7 +9,7 @@ Candidate skills are modeled with role-relevant proficiency and years of experie
 > **Before submitting:** replace the screen recording placeholder below with your real public link.
 >
 > - Hosted demo: https://graph-hire-ai.vercel.app/
-> - Screen recording: `ADD_SCREEN_RECORDING_URL`
+> - Screen recording://https://www.loom.com/share/961dcdc9fb384c91bef723b5e340ef0f
 
 ## Why a graph database?
 
