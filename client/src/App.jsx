@@ -668,6 +668,7 @@ export default function App() {
           </div>
         )}
 
+
         {/* SKILL PATHS */}
         {activeTab === "gap" && (
           <div className="space-y-6">
